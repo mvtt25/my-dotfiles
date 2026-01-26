@@ -27,7 +27,7 @@
     },
     "break",
     {
-      "key": "     OS          ",
+      "key": "     OS          ",
       "keyColor": "green",
       "type": "os"
     },
@@ -37,7 +37,7 @@
       "type": "host"
     },
     {
-      "key": "    󰘚 Kernel      ",
+      "key": "     Kernel      ",
       "keyColor": "blue",
       "type": "kernel"
     },
@@ -47,7 +47,7 @@
       "type": "uptime"
     },
     {
-      "key": "     Packages    ",
+      "key": "     Packages    ",
       "keyColor": "cyan",
       "type": "packages"
     },
@@ -57,22 +57,22 @@
       "type": "de"
     },
     {
-      "key": "     WM          ",
+      "key": "     WM          ",
       "keyColor": "green",
       "type": "wm"
     },
     {
-      "key": "     Shell       ",
+      "key": "     Shell       ",
       "keyColor": "cyan",
       "type": "shell"
     },
     {
-      "key": "     Terminal    ",
+      "key": "     Terminal    ",
       "keyColor": "blue",
       "type": "terminal"
     },
     {
-      "key": "     Font        ",
+      "key": "     Font        ",
       "keyColor": "green",
       "type": "terminalfont"
     },
@@ -93,7 +93,7 @@
       "folders": "/"
     },
     {
-      "key": "     Wifi        ",
+      "key": "     Wifi        ",
       "keyColor": "cyan",
       "type": "wifi"
     },
@@ -122,8 +122,11 @@
     "break",
     {
       "type": "colors",
-      "paddingLeft": 40,
-      "symbol": "diamond"
+      "paddingLeft": 34,
+      "symbol": "circle",
+      "block": {
+        "width": 10
+      }
     }
   ]
 }

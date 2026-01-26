@@ -13,10 +13,9 @@ return {
           ignored = true,
           layout = {
             layout = {
-              position = "right",
+              position = "left",
             },
             preview = true,
-            width = 20,
           },
         },
       },
