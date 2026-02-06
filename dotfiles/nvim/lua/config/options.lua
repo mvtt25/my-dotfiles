@@ -3,12 +3,12 @@
 -- Add any additional options here
 
 -- Cursor settings
--- Stili disponibili: block, ver (verticale), hor (orizzontale)
--- Formato: mode-style-blink
+-- Available styles: block, ver (vertical), hor (horizontal)
+-- Format: mode-style-blink
 vim.opt.guicursor = {
-  "n-v-c:block-Cursor/lCursor", -- Normal, Visual, Command: blocco
-  "i-ci-ve:ver15-Cursor/lCursor-blinkon500-blinkoff500", -- Insert: linea verticale (25% larghezza) lampeggiante
-  "r-cr:hor10-Cursor/lCursor", -- Replace: linea orizzontale (20% altezza)
-  "o:hor50-Cursor/lCursor", -- Operator-pending: linea orizzontale (50%)
-  "sm:block-Cursor/lCursor-blinkwait175-blinkoff150-blinkon175", -- Showmatch: blocco lampeggiante
+  "n-v-c:block-Cursor/lCursor", -- Normal, Visual, Command: block
+  "i-ci-ve:ver15-Cursor/lCursor-blinkon500-blinkoff500", -- Insert: vertical line (25% width) blinking
+  "r-cr:hor10-Cursor/lCursor", -- Replace: horizontal line (20% height)
+  "o:hor50-Cursor/lCursor", -- Operator-pending: horizontal line (50%)
+  "sm:block-Cursor/lCursor-blinkwait175-blinkoff150-blinkon175", -- Showmatch: blinking block
 }
