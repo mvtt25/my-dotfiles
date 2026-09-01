@@ -24,7 +24,6 @@ Modular WezTerm configuration with optimized font rendering, performance setting
 │   ├── keybindings.lua      # Tmux-style keybindings
 │   ├── performance.lua      # WebGPU and FPS settings
 │   ├── tabbar.lua           # Custom tab bar
-│   ├── tabbar-plugin.lua    # Tabline.wez plugin integration
 │   └── themes/
 │       ├── matt.lua         # Custom theme
 │       └── vscode.lua       # VS Code Dark+ theme
@@ -127,17 +126,25 @@ Available themes:
 - `config.themes.matt` - Custom theme
 - `config.themes.vscode` - VS Code Dark+ theme
 
-## Tab Bar Variants
+## Tab Bar
 
-Switch between custom tab bar and tabline.wez plugin by editing `wezterm.lua`:
+Fancy tab bar, "Signal" design (`config/tabbar.lua`): a state dot per tab
+(purple active / pink unread output / dim idle), the index, the process glyph
+(`utils/icons.lua`) and the directory name. Height is set by `BAR_FONT_SIZE` at
+the top of the file — the bar has its own font, so the terminal's `line_height`
+is free to be a typographic choice.
 
-```lua
--- Line 63
-local TABBAR_MODULE = "config.tabbar-plugin" -- or "config.tabbar"
-```
+Left: `$USER ❯ workspace`, read as a prompt; `$USER` becomes `LEADER` in pink
+while the leader key is held. Right: CPU and memory as numerals behind their
+glyphs in a whisper colour, going pink and bold past `HOT_CPU` (80%) /
+`HOT_MEM` (95% of RAM), then the git branch of the focused pane and the clock.
 
-- `config.tabbar` - Custom implementation with Powerline separators
-- `config.tabbar-plugin` - Tabline.wez plugin with advanced features
+Metrics are sampled every 3s by `utils/sysinfo.lua` — memory live from `vm_stat`,
+CPU as a real rate from the delta of cumulative process CPU time over the window
+(not `ps -o %cpu`, which is a decaying ~1 minute average); the branch is read from
+`.git/HEAD` by `utils/git.lua`, never by running `git`. Colours come from the
+active theme's `M.statusbar` table, with a full set of defaults in
+`config/tabbar.lua` so a theme missing a token degrades instead of breaking.
 
 ## Customization
 

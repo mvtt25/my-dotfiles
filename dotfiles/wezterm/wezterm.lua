@@ -10,10 +10,11 @@
 --   config/appearance.lua  - Window styling and positioning
 --   config/performance.lua - WebGPU rendering and FPS settings
 --   config/keybindings.lua - Tmux-style keybindings
---   config/tabbar.lua      - Custom tab bar with Powerline separators
---   config/tabbar-plugin.lua - Tabline.wez plugin (advanced tab bar)
---   utils/icons.lua        - Icon mapping for directories
---   utils/git.lua          - Git status helpers
+--   config/tabbar.lua      - Custom fancy tab bar ("Signal" design)
+--   config/persistence.lua - Workspace tab persistence (resurrect.wezterm)
+--   utils/sysinfo.lua      - CPU / memory sampling for the tab bar
+--   utils/icons.lua        - Process glyphs for the tab bar
+--   utils/git.lua          - Branch name read from .git/HEAD
 --
 -- ============================================================================
 -- Keybindings Documentation
@@ -26,6 +27,7 @@
 --   LEADER + b           Previous tab
 --   LEADER + n           Next tab
 --   LEADER + <0-9>       Switch to specific tab
+--   LEADER + p           Show profile/launch menu (Claude accounts)
 --
 -- Pane Splitting:
 --   LEADER + |           Split horizontally
@@ -43,8 +45,16 @@
 --   LEADER + DownArrow   Increase size down
 --   LEADER + UpArrow     Increase size up
 --
--- Status Line:
---   When leader is active, displays: 🌊 recording...
+-- Workspaces:
+--   LEADER + w           List/switch workspaces (fuzzy picker)
+--   LEADER + W           Create new workspace (prompt for name)
+--   LEADER + r           Rename current workspace
+--
+-- Tab Bar:
+--   Left:  $USER (LEADER while the leader key is held)
+--   Tabs:  ● purple active | ● pink unread output | ● dim idle, then the
+--          index, the process glyph and the directory name
+--   Right: CPU · MEM · workspace · clock
 -- ============================================================================
 
 local wezterm = require("wezterm")
@@ -55,13 +65,6 @@ if wezterm.config_builder then
 	config = wezterm.config_builder()
 end
 
--- ============================================================================
--- TABBAR CONFIGURATION SWITCH
--- ============================================================================
--- Switch between custom tabbar and tabline.wez plugin
--- Options: "config.tabbar" (custom) or "config.tabbar-plugin" (plugin)
-local TABBAR_MODULE = "config.tabbar-plugin" -- Change to "config.tabbar-plugin" to use plugin
-
 -- Load and apply configuration modules
 -- Each module returns a table with an apply_to_config function
 -- that immutably applies settings to the config
@@ -71,8 +74,10 @@ local modules = {
 	"config.font",
 	"config.performance",
 	"config.keybindings",
-	TABBAR_MODULE,
+	"config.tabbar",
 	"config.appearance",
+	"config.profiles",
+	"config.persistence",
 }
 
 -- Apply each module with error handling

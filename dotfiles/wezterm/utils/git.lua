@@ -1,136 +1,84 @@
--- Git helper functions for tab bar
--- Provides branch name and dirty status with caching
+-- Git branch for the tab bar, read straight off the filesystem.
+--
+-- No `git` subprocess: the status bar redraws every second and shelling out
+-- there would block the UI thread. Reading .git/HEAD is a few hundred bytes.
+-- Trade-off: no dirty marker (*), that would need a real `git status`.
 
 local M = {}
 
--- Cache for git information (to avoid running git commands too frequently)
-local git_cache = {}
-local cache_duration = 3 -- seconds
+local MAX_WALK = 24 -- give up rather than climb to /
 
--- Get current time in seconds
-local function get_current_time()
-  return os.time()
-end
-
--- Execute a shell command and return output
-local function execute_command(cmd)
-  local handle = io.popen(cmd)
-  if not handle then
+-- Reads the head of a file; nil for anything unreadable (incl. directories).
+local function read_head(path)
+  local file = io.open(path, "r")
+  if not file then
     return nil
   end
 
-  local result = handle:read("*a")
-  handle:close()
+  local ok, data = pcall(file.read, file, 512)
+  file:close()
 
-  return result
+  if not ok or type(data) ~= "string" or data == "" then
+    return nil
+  end
+  return data
 end
 
--- Get git branch name for a directory
-function M.get_git_branch(cwd)
-  if not cwd or cwd == "" then
+-- ".git/HEAD" contents -> branch name, or a short sha when detached.
+function M.parse_head(text)
+  if type(text) ~= "string" then
     return nil
   end
 
-  -- Check cache first
-  local cache_key = "branch_" .. cwd
-  local cached = git_cache[cache_key]
-  local current_time = get_current_time()
-
-  if cached and (current_time - cached.time) < cache_duration then
-    return cached.value
+  local branch = text:match("ref:%s*refs/heads/(%S+)")
+  if branch then
+    return branch
   end
 
-  -- Get branch name from git
-  local cmd = string.format(
-    'cd "%s" 2>/dev/null && git rev-parse --abbrev-ref HEAD 2>/dev/null',
-    cwd
-  )
-  local result = execute_command(cmd)
+  local sha = text:match("^(%x%x%x%x%x%x%x)")
+  return sha
+end
 
-  if not result or result == "" then
-    git_cache[cache_key] = { value = nil, time = current_time }
+-- Walks up from `dir` looking for a repository. ".git" is a directory in a
+-- normal clone and a "gitdir:" pointer file in a worktree or submodule.
+function M.git_dir(dir)
+  if type(dir) ~= "string" or dir == "" then
     return nil
   end
 
-  -- Trim whitespace
-  local branch = result:gsub("%s+", "")
+  local current = dir:gsub("/+$", "")
 
-  -- Cache the result
-  git_cache[cache_key] = { value = branch, time = current_time }
+  for _ = 1, MAX_WALK do
+    if read_head(current .. "/.git/HEAD") then
+      return current .. "/.git"
+    end
 
-  return branch
-end
+    local pointer = read_head(current .. "/.git")
+    local gitdir = pointer and pointer:match("gitdir:%s*(.-)%s*$")
+    if gitdir then
+      if not gitdir:match("^/") then
+        gitdir = current .. "/" .. gitdir
+      end
+      return gitdir
+    end
 
--- Check if git repository has uncommitted changes
-function M.is_git_dirty(cwd)
-  if not cwd or cwd == "" then
-    return false
+    local parent = current:match("^(.*)/[^/]+$")
+    if not parent or parent == current then
+      return nil
+    end
+    current = parent
   end
 
-  -- Check cache first
-  local cache_key = "dirty_" .. cwd
-  local cached = git_cache[cache_key]
-  local current_time = get_current_time()
-
-  if cached and (current_time - cached.time) < cache_duration then
-    return cached.value
-  end
-
-  -- Check git status
-  local cmd = string.format(
-    'cd "%s" 2>/dev/null && git status --porcelain 2>/dev/null',
-    cwd
-  )
-  local result = execute_command(cmd)
-
-  local is_dirty = result and result ~= ""
-
-  -- Cache the result
-  git_cache[cache_key] = { value = is_dirty, time = current_time }
-
-  return is_dirty
+  return nil
 end
 
--- Get git information for a tab (branch + dirty status)
-function M.get_git_info(tab)
-  local cwd = tab.active_pane.current_working_dir
-
-  if not cwd then
+-- Branch name for the repository containing `dir`, or nil outside a repo.
+function M.branch(dir)
+  local gitdir = M.git_dir(dir)
+  if not gitdir then
     return nil
   end
-
-  -- Extract path from URL format
-  local path = cwd
-  if type(cwd) == "userdata" then
-    path = cwd.file_path or ""
-  elseif type(cwd) == "string" then
-    path = cwd:gsub("^file://[^/]*/", "/")
-  end
-
-  local branch = M.get_git_branch(path)
-
-  if not branch then
-    return nil
-  end
-
-  local is_dirty = M.is_git_dirty(path)
-
-  return {
-    branch = branch,
-    dirty = is_dirty,
-  }
-end
-
--- Format git info for display
-function M.format_git_info(git_info)
-  if not git_info then
-    return ""
-  end
-
-  local branch_icon = ""
-  local dirty_indicator = git_info.dirty and "*" or ""
-
-  return string.format(" %s %s%s", branch_icon, git_info.branch, dirty_indicator)
+  return M.parse_head(read_head(gitdir .. "/HEAD"))
 end
 
 return M

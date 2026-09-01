@@ -23,6 +23,7 @@ function M.apply_to_config(config)
 		-- UI elements
 		scrollbar_thumb = "#424242",
 		split = "#2d2d2d",
+		visual_bell = "#3a2020",
 
 		-- ANSI colors (VS Code Dark+)
 		ansi = {
@@ -85,5 +86,25 @@ function M.apply_to_config(config)
 
 	return config
 end
+
+-- ── Statusbar colors (consumed by config/tabbar.lua) ──────
+M.statusbar = {
+	active_bg = "#252526",
+	active_fg = "#ffffff",
+	active_index = "#569cd6",
+
+	inactive_bg = "#1e1e1e",
+	inactive_fg = "#858585",
+	inactive_index = "#4a7ba8",
+
+	bar_bg = "#1e1e1e",
+	alert = "#f44747",
+	dim = "#3a3a3a",
+	whisper = "#5a5a5a",
+	hover_fg = "#d4d4d4",
+
+	leader_bg = "#569cd6",
+	leader_fg = "#1e1e1e",
+}
 
 return M

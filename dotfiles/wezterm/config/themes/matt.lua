@@ -24,6 +24,7 @@ function M.apply_to_config(config)
 		-- UI elements
 		scrollbar_thumb = "#16181a",
 		split = "#16181a",
+		visual_bell = "#2e1a14",
 
 		-- ANSI colors
 		ansi = {
@@ -87,5 +88,27 @@ function M.apply_to_config(config)
 
 	return config
 end
+
+M.statusbar = {
+	active_bg = "#3d2554",
+	active_fg = "#d8c6f2",
+	active_index = "#b7bdf8",
+	inactive_bg = "#1a0028",
+	inactive_fg = "#8b7aa8",
+	inactive_index = "#6366f1",
+	bar_bg = "#0B0017",
+	alert = "#ff6e5e",
+	dim = "#2f2745",
+	whisper = "#4a3b66",
+	hover_fg = "#f5c2e7",
+	leader_bg = "#b7bdf8",
+	leader_fg = "#000000",
+	plugin_active_fg = "#89b4fa",
+	plugin_active_bg = "#313244",
+	plugin_inactive_fg = "#cdd6f4",
+	plugin_inactive_bg = "#181825",
+	plugin_inactive_hover_fg = "#f5c2e7",
+	plugin_inactive_hover_bg = "#313244",
+}
 
 return M

@@ -18,6 +18,13 @@ function M.apply_to_config(config)
       action = wezterm.action.ReloadConfiguration,
     },
 
+    -- Profile Switcher (Launch Menu)
+    {
+      mods = "LEADER",
+      key = "p",
+      action = wezterm.action.ShowLauncher,
+    },
+
     -- Tab Management
     {
       mods = "LEADER",
@@ -38,6 +45,18 @@ function M.apply_to_config(config)
       mods = "LEADER",
       key = "n",
       action = wezterm.action.ActivateTabRelative(1),
+    },
+
+    -- Tab Reordering
+    {
+      mods = "LEADER",
+      key = "è",
+      action = wezterm.action.MoveTabRelative(-1),
+    },
+    {
+      mods = "LEADER",
+      key = "+",
+      action = wezterm.action.MoveTabRelative(1),
     },
 
     -- Pane Splitting
@@ -74,6 +93,65 @@ function M.apply_to_config(config)
       action = wezterm.action.ActivatePaneDirection("Right"),
     },
 
+    -- Workspace: List/Switch (fuzzy picker)
+    {
+      mods = "LEADER",
+      key = "w",
+      action = wezterm.action.ShowLauncherArgs({ flags = "FUZZY|WORKSPACES" }),
+    },
+    -- Workspace: Create new (prompt for name)
+    {
+      mods = "LEADER",
+      key = "W",
+      action = wezterm.action_callback(function(window, pane)
+        window:perform_action(
+          wezterm.action.PromptInputLine({
+            description = wezterm.format({
+              { Attribute = { Intensity = "Bold" } },
+              { Foreground = { AnsiColor = "Fuchsia" } },
+              { Text = "Enter name for new workspace" },
+            }),
+            action = wezterm.action_callback(function(inner_window, inner_pane, line)
+              if line then
+                inner_window:perform_action(
+                  wezterm.action.SwitchToWorkspace({ name = line }),
+                  inner_pane
+                )
+              end
+            end),
+          }),
+          pane
+        )
+      end),
+    },
+    -- Workspace: Rename current
+    {
+      mods = "LEADER",
+      key = "r",
+      action = wezterm.action_callback(function(window, pane)
+        local current_workspace = window:active_workspace()
+        window:perform_action(
+          wezterm.action.PromptInputLine({
+            description = wezterm.format({
+              { Attribute = { Intensity = "Bold" } },
+              { Foreground = { AnsiColor = "Fuchsia" } },
+              { Text = "Rename workspace '" .. current_workspace .. "' to:" },
+            }),
+            action = wezterm.action_callback(function(_, _, line)
+              if line and #line > 0 then
+                -- Rename all mux windows in the current workspace
+                for _, mux_win in ipairs(wezterm.mux.all_windows()) do
+                  if mux_win:get_workspace() == current_workspace then
+                    mux_win:set_workspace(line)
+                  end
+                end
+              end
+            end),
+          }),
+          pane
+        )
+      end),
+    },
     -- Pane Resizing
     {
       mods = "LEADER",
